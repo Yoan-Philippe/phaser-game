@@ -14,6 +14,9 @@ var directionZombie = 'left';
 var directionZombie2 = 'left';
 var fuelBar;
 
+var weapon;
+var fireButton;
+
 var game = new Phaser.Game(800, 600, Phaser.AUTO, 'gameContainer');
 
 game.state.add('boot', bootState);
@@ -61,3 +64,16 @@ function healPlayer (player, medic) {
     healthText.text = 'Health: ' + health;
 }
 
+
+function killZombie (zombie, bullet) {
+    hit = game.add.audio('hit');
+    hit.play();
+    zombie.kill();
+    bullet.kill();
+    score += 20;
+    scoreText.text = 'Score: ' + score;
+}
+
+function killBullet (bullet, platform) {
+    bullet.kill();
+}

@@ -14,12 +14,14 @@ var loadState = {
         game.load.spritesheet('zombie', 'assets/zombie/zombie_tilesheet.png', 80, 110);
         game.load.spritesheet('tree1', 'assets/foliagePack_default.png', 150, 210);
         game.load.spritesheet('tree2', 'assets/foliagePack_default.png', 172, 193, 150,-20);
+        game.load.image('bullet', 'assets/weapon/ammo_machinegun.png');
 
         game.load.audio('win', 'assets/sounds/you_win.ogg');
         game.load.audio('lose', 'assets/sounds/time_over.ogg');
         game.load.audio('coin', 'assets/sounds/coin.wav');
         game.load.audio('diamond', 'assets/sounds/diamond.wav');
         game.load.audio('medic', 'assets/sounds/power_up.ogg');
+        game.load.audio('hit', 'assets/sounds/correct.ogg');
 
     },
 
@@ -54,22 +56,28 @@ var loadState = {
         lifebar.body.immovable = true;
         lifebar.scale.setTo(1, 0.15);
 
+
+        players = game.add.group();
+        ennemies = game.add.group();
+
         // The players
         player = game.add.sprite(400, game.world.height - 150, 'dude');
         game.physics.arcade.enable(player);
-        player.body.bounce.y = 0.2;
-        player.body.gravity.y = 600;
         player.body.collideWorldBounds = true;
         player.animations.add('left', [0, 1, 2, 3], 10, true);
         player.animations.add('right', [5, 6, 7, 8], 10, true);
 
+        players.add(player);
+
         sarah = game.add.sprite(100, game.world.height - 150, 'dude');
         game.physics.arcade.enable(sarah);
-        sarah.body.bounce.y = 0.2;
-        sarah.body.gravity.y = 600;
         sarah.body.collideWorldBounds = true;
         sarah.animations.add('left', [0, 1, 2, 3], 10, true);
         sarah.animations.add('right', [5, 6, 7, 8], 10, true);
+
+        players.add(sarah);
+        players.setAll('body.gravity.y', 600);
+        players.setAll('body.bounce.y', 0.2);
 
         sarah.scale.setTo(1.5, 1.5);
 
@@ -80,6 +88,8 @@ var loadState = {
         zombie.body.collideWorldBounds = true;
         zombie.animations.add('left', [09, 10], 4, true);
         zombie.animations.add('right', [09, 10], 4, true);
+
+        ennemies.add(zombie);
         
 
         zombie.scale.setTo(0.5, 0.5);
@@ -92,7 +102,28 @@ var loadState = {
         zombie2.scale.setTo(0.5, 0.5);
         zombie2.animations.add('left', [09, 10], 4, true);
         zombie2.animations.add('right', [09, 10], 4, true);
+
+        ennemies.add(zombie2);
         
+        //  Creates 1 single bullet, using the 'bullet' graphic
+        weapon = game.add.weapon(3, 'bullet');
+        game.physics.arcade.enable(weapon);
+
+        //  The bullet will be automatically killed when it leaves the world bounds
+        weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+
+        //  Because our bullet is drawn facing up, we need to offset its rotation:
+        weapon.bulletAngleOffset = 90;
+        weapon.fireRate = 400;
+        //weapon.autofire = true;
+
+        //  The speed at which the bullet is fired
+        weapon.bulletSpeed = 400;
+        weapon.fireAngle = 0;
+
+        weapon.trackSprite(player, 20, 20);
+        fireButton = game.input.keyboard.addKey(Phaser.KeyCode.SPACEBAR);
+
 
         healers = game.add.group();
         healers.enableBody = true;
@@ -141,7 +172,6 @@ var loadState = {
     },
 
     update: function(){
-            //  Collide the player
             var hitPlatformHeal = game.physics.arcade.collide(healers, platforms);
             var hitPlatform = game.physics.arcade.collide(player, platforms);
             var hitPlatformSarah = game.physics.arcade.collide(sarah, platforms);
@@ -160,15 +190,22 @@ var loadState = {
             left = game.input.keyboard.addKey(Phaser.Keyboard.A);
             right = game.input.keyboard.addKey(Phaser.Keyboard.D);
 
+            if (fireButton.isDown)
+            {
+                weapon.fire();
+            }
+
 
             player.body.velocity.x = 0;
             if (cursors.left.isDown) {
                 player.body.velocity.x = -150;
                 player.animations.play('left');
+                weapon.fireAngle = 180;
             } else if (cursors.right.isDown)
             {
                 player.body.velocity.x = 150;
                 player.animations.play('right');
+                weapon.fireAngle = 0;
             }
             else {
                 player.animations.stop();
@@ -219,6 +256,10 @@ var loadState = {
             //Star
             game.physics.arcade.collide(stars, platforms);
             game.physics.arcade.overlap(sarah, stars, collectStar, null, this);
+
+            game.physics.arcade.overlap(weapon.bullets, zombie, killZombie, null, this);
+            game.physics.arcade.overlap(weapon.bullets, zombie2, killZombie, null, this);
+            game.physics.arcade.overlap(weapon.bullets, platforms, killBullet, null, this);
 
 
              //Medic
