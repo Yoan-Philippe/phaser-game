@@ -43,7 +43,21 @@ function damagePlayer (player, zombie) {
     //diamondSound = game.add.audio('diamond');
     //diamondSound.play();
     //diamond.kill();
-    health -= 1;
+    if(health>0){
+        health -= 1;
+    }
+    else{
+        player.kill();
+    }
+    healthText.text = 'Health: ' + health;
+}
+
+function healPlayer (player, medic) {
+    healSound = game.add.audio('medic');
+    healSound.play();
+    medic.kill();
+    health += 50;
+
     healthText.text = 'Health: ' + health;
 }
 

@@ -9,6 +9,7 @@ var loadState = {
         game.load.image('fuel', 'assets/fuel.png');
         game.load.image('star', 'assets/star.png');
         game.load.image('diamond', 'assets/diamond.png');
+        game.load.image('firstaid', 'assets/firstaid.png');
         game.load.spritesheet('dude', 'assets/dude.png', 32, 48);
         game.load.spritesheet('zombie', 'assets/zombie/zombie_tilesheet.png', 80, 110);
         game.load.spritesheet('tree1', 'assets/foliagePack_default.png', 150, 210);
@@ -18,6 +19,7 @@ var loadState = {
         game.load.audio('lose', 'assets/sounds/time_over.ogg');
         game.load.audio('coin', 'assets/sounds/coin.wav');
         game.load.audio('diamond', 'assets/sounds/diamond.wav');
+        game.load.audio('medic', 'assets/sounds/power_up.ogg');
 
     },
 
@@ -90,6 +92,16 @@ var loadState = {
         zombie2.scale.setTo(0.5, 0.5);
         zombie2.animations.add('left', [09, 10], 4, true);
         zombie2.animations.add('right', [09, 10], 4, true);
+        
+
+        healers = game.add.group();
+        healers.enableBody = true;
+
+        firstaid = healers.create(385, 50, 'firstaid');
+        game.physics.arcade.enable(firstaid);
+        firstaid.body.gravity.y = 200;
+        firstaid.body.bounce.y = 0.2;
+
 
         // Collectables
         stars = game.add.group();
@@ -107,7 +119,7 @@ var loadState = {
         for (var i = 1; i < 4; i++)
         {
             if(i == 1){
-                var diamond = diamonds.create(i * 350, 70, 'diamond');
+                var diamond = diamonds.create(i * 325, 70, 'diamond');
             }
             if(i == 2){
                 var diamond = diamonds.create(i * 370, 350, 'diamond');
@@ -130,14 +142,15 @@ var loadState = {
 
     update: function(){
             //  Collide the player
+            var hitPlatformHeal = game.physics.arcade.collide(healers, platforms);
             var hitPlatform = game.physics.arcade.collide(player, platforms);
             var hitPlatformSarah = game.physics.arcade.collide(sarah, platforms);
             var hitPlatformZombie = game.physics.arcade.collide(zombie, platforms);
             var hitPlatformZombie2 = game.physics.arcade.collide(zombie2, platforms);
             var hitPlayerZombie1 = game.physics.arcade.collide(zombie, player);
-            var hitSarahZombie1 = game.physics.arcade.collide(zombie, sarah);
+           // var hitSarahZombie1 = game.physics.arcade.collide(zombie, sarah);
             var hitPlayerZombie2 = game.physics.arcade.collide(zombie2, player);
-            var hitSarahZombie2 = game.physics.arcade.collide(zombie2, sarah);
+            //var hitSarahZombie2 = game.physics.arcade.collide(zombie2, sarah);
             var playerOnWall = player.body.onWall();
 
             // Movements
@@ -152,8 +165,6 @@ var loadState = {
             if (cursors.left.isDown) {
                 player.body.velocity.x = -150;
                 player.animations.play('left');
-                zombie.animations.play('left');
-                zombie2.animations.play('left');
             } else if (cursors.right.isDown)
             {
                 player.body.velocity.x = 150;
@@ -201,13 +212,17 @@ var loadState = {
 
             //Zombie
             game.physics.arcade.overlap(sarah, zombie, damagePlayer, null, this);
-            game.physics.arcade.overlap(player, zombie, damagePlayer, null, this);
+            //game.physics.arcade.overlap(player, zombie, damagePlayer, null, this);
             game.physics.arcade.overlap(sarah, zombie2, damagePlayer, null, this);
-            game.physics.arcade.overlap(player, zombie2, damagePlayer, null, this);
+            //game.physics.arcade.overlap(player, zombie2, damagePlayer, null, this);
 
             //Star
             game.physics.arcade.collide(stars, platforms);
             game.physics.arcade.overlap(sarah, stars, collectStar, null, this);
+
+
+             //Medic
+            game.physics.arcade.overlap(player, firstaid, healPlayer, null, this);
 
             //Diamond
             game.physics.arcade.collide(diamonds, platforms);
