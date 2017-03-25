@@ -1,0 +1,23 @@
+/*
+For Fullscreen put this code:
+
+var w = window.innerWidth * window.devicePixelRatio,
+    h = window.innerHeight * window.devicePixelRatio;
+*/
+
+
+
+//game.add.plugin(Phaser.Plugin.Debug);
+//game.add.image(95, 150, 'boiler-logo');
+//game.add.plugin(Phaser.Plugin.Inspector);
+
+
+//Load your sounds, efx, music...
+//Example: game.load.audio('rockas', 'assets/snd/rockas.wav');
+
+//Load your data, JSON, Querys...
+//Example: game.load.json('version', 'http://phaser.io/version.json');
+
+
+//game.stage.setBackgroundColor('#000');
+//game.scale.fullScreenScaleMode = Phaser.ScaleManager.EXACT_FIT;
