@@ -15,6 +15,9 @@ var direction = 'left';
 var directionZombie = 'left';
 var directionZombie2 = 'left';
 var fuelBar;
+var zombieCanMove = true;
+var playerHit = false;
+var player2Hit = false;
 
 var weapon;
 var fireButton;
@@ -25,10 +28,42 @@ game.state.add('boot', bootState);
 game.state.add('intro', introState);
 game.state.add('level1', loadState);
 game.state.add('finish', finishState);
-game.state.add('level2', level2State);
+//game.state.add('level2', level2State);
 
 game.state.start('boot');
 
+
+function nextLevel () {
+    score = 0;
+    health = 100;
+    zombieHealth = 100;
+    zombie2Health = 100;
+    time = 1500;
+    game.state.start('level1');
+}
+
+function startGame () {
+    start = game.add.audio('start');
+    start.volume = 0.5;
+    start.play();
+    game.state.start('level1');
+}
+
+function restartGame () {
+    score = 0;
+    health = 100;
+    zombieHealth = 100;
+    zombie2Health = 100;
+    time = 1300;
+    zombieCanMove = true;
+    startGame();
+}
+
+function startMusic() {
+    intro.volume = 0.4;
+    intro.play();
+    //intro.fadeIn(4000);
+}
 
 function collectStar (player, star) {
 	coin = game.add.audio('coin');
@@ -46,18 +81,6 @@ function collectDiamond (player, diamond) {
     scoreText.text = 'Score: ' + score;
 }
 
-function damagePlayer (player, zombie) {
-    //diamondSound = game.add.audio('diamond');
-    //diamondSound.play();
-    //diamond.kill();
-    if(health>0){
-        health -= 1;
-    }
-    else{
-        player.kill();
-    }
-    healthText.text = 'Health: ' + health;
-}
 
 function healPlayer (player, medic) {
     healSound = game.add.audio('medic');
@@ -102,33 +125,26 @@ function killBullet (bullet, platform) {
 }
 
 
-function nextLevel () {
-    score = 0;
-    health = 100;
-    zombieHealth = 100;
-    zombie2Health = 100;
-    time = 1500;
-    game.state.start('level2');
+function checkCollide (sprite1, sprite2){
+    if(sprite2.key == 'zombie'){
+        if(health>0){
+            health -= 1;
+        }
+        else{
+            player.kill();
+        }
+        healthText.text = 'Health: ' + health;
+    }
 }
 
-function startGame () {
-    start = game.add.audio('start');
-    start.volume = 0.5;
-    start.play();
-    game.state.start('level1');
-}
-
-function restartGame () {
-    score = 0;
-    health = 100;
-    zombieHealth = 100;
-    zombie2Health = 100;
-    time = 1300;
-    startGame();
-}
-
-function startMusic() {
-    intro.volume = 0.4;
-    intro.play();
-    //intro.fadeIn(4000);
+function checkCollidePlayer2 (sprite1, sprite2){
+    if(sprite2.key == 'zombie'){
+        if(health>0){
+            health -= 1;
+        }
+        else{
+            sarah.kill();
+        }
+        healthText.text = 'Health: ' + health;
+    }
 }

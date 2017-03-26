@@ -89,6 +89,8 @@ var loadState = {
         zombie.body.collideWorldBounds = true;
         zombie.animations.add('left', [09, 10], 4, true);
         zombie.animations.add('right', [09, 10], 4, true);
+        zombie.animations.add('fight', [13, 14], 4, true);
+        zombie.animations.add('zombiewin', [7, 8], 4, true);
 
         ennemies.add(zombie);
         
@@ -103,8 +105,18 @@ var loadState = {
         zombie2.scale.setTo(0.5, 0.5);
         zombie2.animations.add('left', [09, 10], 4, true);
         zombie2.animations.add('right', [09, 10], 4, true);
+        zombie2.animations.add('fight', [13, 14], 4, true);
+        zombie2.animations.add('zombiewin', [7, 8], 4, true);
 
         ennemies.add(zombie2);
+
+        player.body.onCollide = new Phaser.Signal();
+        sarah.body.onCollide = new Phaser.Signal();
+        player.body.onCollide.add(checkCollide, this);
+        sarah.body.onCollide.add(checkCollidePlayer2, this);
+
+        zombie.anchor.setTo(.5,.5);
+        zombie2.anchor.setTo(.5,.5);
         
         //  Creates 1 single bullet, using the 'bullet' graphic
         weapon = game.add.weapon(3, 'bullet');
@@ -178,11 +190,36 @@ var loadState = {
             var hitPlatformSarah = game.physics.arcade.collide(sarah, platforms);
             var hitPlatformZombie = game.physics.arcade.collide(zombie, platforms);
             var hitPlatformZombie2 = game.physics.arcade.collide(zombie2, platforms);
-            //var hitPlayerZombie1 = game.physics.arcade.collide(zombie, player);
-            //var hitSarahZombie1 = game.physics.arcade.collide(zombie, sarah);
-            //var hitPlayerZombie2 = game.physics.arcade.collide(zombie2, player);
-            //var hitSarahZombie2 = game.physics.arcade.collide(zombie2, sarah);
+
+            playerHitByZombie = game.physics.arcade.collide(player, zombie); 
+            playerHitByZombie2 = game.physics.arcade.collide(player, zombie2); 
+            player2HitByZombie = game.physics.arcade.collide(sarah, zombie); 
+            player2HitByZombie2 = game.physics.arcade.collide(sarah, zombie2); 
+
             var playerOnWall = player.body.onWall();
+
+            //Zombie
+            /*game.physics.arcade.overlap(sarah, zombie, damagePlayer, null, this);
+            game.physics.arcade.overlap(player, zombie, damagePlayer, null, this);
+            game.physics.arcade.overlap(sarah, zombie2, damagePlayer, null, this);
+            game.physics.arcade.overlap(player, zombie2, damagePlayer, null, this);*/
+
+            //Star
+            game.physics.arcade.collide(stars, platforms);
+            game.physics.arcade.overlap(sarah, stars, collectStar, null, this);
+
+            game.physics.arcade.overlap(weapon.bullets, zombie, hitZombie, null, this);
+            game.physics.arcade.overlap(weapon.bullets, zombie2, hitZombie2, null, this);
+            game.physics.arcade.overlap(weapon.bullets, platforms, killBullet, null, this);
+
+
+             //Medic
+            game.physics.arcade.overlap(player, firstaid, healPlayer, null, this);
+
+            //Diamond
+            game.physics.arcade.collide(diamonds, platforms);
+            game.physics.arcade.overlap(player, diamonds, collectDiamond, null, this);
+
 
             // Movements
             cursors = game.input.keyboard.createCursorKeys();
@@ -248,28 +285,8 @@ var loadState = {
                 player.body.velocity.y = -250;
             }
 
-            //Zombie
-            game.physics.arcade.overlap(sarah, zombie, damagePlayer, null, this);
-            game.physics.arcade.overlap(player, zombie, damagePlayer, null, this);
-            game.physics.arcade.overlap(sarah, zombie2, damagePlayer, null, this);
-            game.physics.arcade.overlap(player, zombie2, damagePlayer, null, this);
 
-            //Star
-            game.physics.arcade.collide(stars, platforms);
-            game.physics.arcade.overlap(sarah, stars, collectStar, null, this);
-
-            game.physics.arcade.overlap(weapon.bullets, zombie, hitZombie, null, this);
-            game.physics.arcade.overlap(weapon.bullets, zombie2, hitZombie2, null, this);
-            game.physics.arcade.overlap(weapon.bullets, platforms, killBullet, null, this);
-
-
-             //Medic
-            game.physics.arcade.overlap(player, firstaid, healPlayer, null, this);
-
-            //Diamond
-            game.physics.arcade.collide(diamonds, platforms);
-            game.physics.arcade.overlap(player, diamonds, collectDiamond, null, this);
-
+            //******* Time and scores *****//
             time = time - 1;
             if(time >= 0){
                 remainingText.text = 'Time: ' + time;
@@ -282,6 +299,9 @@ var loadState = {
                     loseText.visible = true;
                     lose = game.add.audio('lose');
                     lose.play();
+                    zombieCanMove = false;
+                    zombie.animations.play('zombiewin');
+                    zombie2.animations.play('zombiewin');
                     button = game.add.button(game.world.centerX - 95, 400, 'restartButton', restartGame, this, 2, 1, 0);
                 }
             }
@@ -307,36 +327,51 @@ var loadState = {
                 }
             }
 
-            if(zombie.body.position.x > 5 && directionZombie == 'left'){
-                zombie.body.position.x = zombie.body.position.x - 2;
-                zombie.animations.play('left');
-            }
-            else{
-                directionZombie = 'right';
-                if(zombie.body.position.x < 750){
-                   zombie.body.position.x = zombie.body.position.x + 2;
-                   zombie.animations.play('right');
+            if(zombieCanMove){
+                if(playerHitByZombie == false && player2HitByZombie == false){
+                    if(zombie.body.position.x > 5 && directionZombie == 'left'){
+                        zombie.body.position.x = zombie.body.position.x - 2;
+                        zombie.animations.play('left');
+                         zombie.scale.x = -0.5;
+                    }
+                    else{
+                        directionZombie = 'right';
+                        if(zombie.body.position.x < 750){
+                           zombie.body.position.x = zombie.body.position.x + 2;
+                           zombie.animations.play('right');
+                           zombie.scale.x = 0.5;
+                        }
+                        else{
+                            directionZombie = 'left';
+                        }
+                    }
                 }
                 else{
-                    directionZombie = 'left';
+                    zombie.animations.play('fight');
                 }
-            }
+                
 
-            if(zombie2.body.position.x > 400 && directionZombie2 == 'left'){
-                zombie2.body.position.x = zombie2.body.position.x - 2;
-                zombie2.animations.play('left');
-            }
-            else{
-                directionZombie2 = 'right';
-                if(zombie2.body.position.x < 750){
-                   zombie2.body.position.x = zombie2.body.position.x + 2;
-                   zombie2.animations.play('right');
+                if(playerHitByZombie2 == false && player2HitByZombie2 == false){
+                    if(zombie2.body.position.x > 400 && directionZombie2 == 'left'){
+                        zombie2.body.position.x = zombie2.body.position.x - 2;
+                        zombie2.animations.play('left');
+                         zombie2.scale.x = -0.5;
+                    }
+                    else{
+                        directionZombie2 = 'right';
+                        if(zombie2.body.position.x < 750){
+                           zombie2.body.position.x = zombie2.body.position.x + 2;
+                           zombie2.animations.play('right');
+                           zombie2.scale.x = 0.5;
+                        }
+                        else{
+                            directionZombie2 = 'left';
+                        }
+                    }
                 }
                 else{
-                    directionZombie2 = 'left';
+                    zombie2.animations.play('fight');
                 }
             }
-
-
     }
 };
