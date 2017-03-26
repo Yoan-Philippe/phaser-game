@@ -21,7 +21,7 @@ var loadState = {
         game.load.audio('coin', 'assets/sounds/coin.wav');
         game.load.audio('diamond', 'assets/sounds/diamond.wav');
         game.load.audio('medic', 'assets/sounds/power_up.ogg');
-        game.load.audio('hit', 'assets/sounds/correct.ogg');
+        game.load.audio('hit', 'assets/sounds/hit4.ogg');
 
     },
 
@@ -177,9 +177,9 @@ var loadState = {
             var hitPlatformSarah = game.physics.arcade.collide(sarah, platforms);
             var hitPlatformZombie = game.physics.arcade.collide(zombie, platforms);
             var hitPlatformZombie2 = game.physics.arcade.collide(zombie2, platforms);
-            var hitPlayerZombie1 = game.physics.arcade.collide(zombie, player);
-           // var hitSarahZombie1 = game.physics.arcade.collide(zombie, sarah);
-            var hitPlayerZombie2 = game.physics.arcade.collide(zombie2, player);
+            //var hitPlayerZombie1 = game.physics.arcade.collide(zombie, player);
+            //var hitSarahZombie1 = game.physics.arcade.collide(zombie, sarah);
+            //var hitPlayerZombie2 = game.physics.arcade.collide(zombie2, player);
             //var hitSarahZombie2 = game.physics.arcade.collide(zombie2, sarah);
             var playerOnWall = player.body.onWall();
 
@@ -249,16 +249,16 @@ var loadState = {
 
             //Zombie
             game.physics.arcade.overlap(sarah, zombie, damagePlayer, null, this);
-            //game.physics.arcade.overlap(player, zombie, damagePlayer, null, this);
+            game.physics.arcade.overlap(player, zombie, damagePlayer, null, this);
             game.physics.arcade.overlap(sarah, zombie2, damagePlayer, null, this);
-            //game.physics.arcade.overlap(player, zombie2, damagePlayer, null, this);
+            game.physics.arcade.overlap(player, zombie2, damagePlayer, null, this);
 
             //Star
             game.physics.arcade.collide(stars, platforms);
             game.physics.arcade.overlap(sarah, stars, collectStar, null, this);
 
-            game.physics.arcade.overlap(weapon.bullets, zombie, killZombie, null, this);
-            game.physics.arcade.overlap(weapon.bullets, zombie2, killZombie, null, this);
+            game.physics.arcade.overlap(weapon.bullets, zombie, hitZombie, null, this);
+            game.physics.arcade.overlap(weapon.bullets, zombie2, hitZombie2, null, this);
             game.physics.arcade.overlap(weapon.bullets, platforms, killBullet, null, this);
 
 
@@ -272,7 +272,7 @@ var loadState = {
             time = time - 1;
             if(time >= 0){
                 remainingText.text = 'Time: ' + time;
-                if(score == 230){
+                if(score >= 180){
                     game.state.start('finish');
                 }
             }
