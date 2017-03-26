@@ -15,6 +15,7 @@ var loadState = {
         game.load.spritesheet('tree1', 'assets/foliagePack_default.png', 150, 210);
         game.load.spritesheet('tree2', 'assets/foliagePack_default.png', 172, 193, 150,-20);
         game.load.image('bullet', 'assets/weapon/ammo_machinegun.png');
+        game.load.spritesheet('restartButton', 'assets/button_sprite_sheet.png', 193, 71);
 
         game.load.audio('win', 'assets/sounds/you_win.ogg');
         game.load.audio('lose', 'assets/sounds/time_over.ogg');
@@ -279,8 +280,9 @@ var loadState = {
             else{
                 if(loseText.visible == false){
                     loseText.visible = true;
-                    //lose = game.add.audio('lose');
-                    //lose.play();
+                    lose = game.add.audio('lose');
+                    lose.play();
+                    button = game.add.button(game.world.centerX - 95, 400, 'restartButton', restartGame, this, 2, 1, 0);
                 }
             }
 

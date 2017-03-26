@@ -5,9 +5,9 @@ var score = 0;
 var health = 100;
 var zombieHealth = 100;
 var zombie2Health = 100;
+var time = 1300;
 var starPoint = 10;
 var diamondPoint = 50;
-var time = 1300;
 var scoreText;
 var remainingText;
 var nbrJump = 2;
@@ -103,7 +103,12 @@ function killBullet (bullet, platform) {
 
 
 function nextLevel () {
-     game.state.start('level2');
+    score = 0;
+    health = 100;
+    zombieHealth = 100;
+    zombie2Health = 100;
+    time = 1500;
+    game.state.start('level2');
 }
 
 function startGame () {
@@ -111,6 +116,15 @@ function startGame () {
     start.volume = 0.5;
     start.play();
     game.state.start('level1');
+}
+
+function restartGame () {
+    score = 0;
+    health = 100;
+    zombieHealth = 100;
+    zombie2Health = 100;
+    time = 1300;
+    startGame();
 }
 
 function startMusic() {

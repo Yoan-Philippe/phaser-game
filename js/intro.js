@@ -2,7 +2,7 @@ var introState = {
 
 	preload: function (){
 
-		game.load.spritesheet('startButton', 'assets/exemples/buttons/button_sprite_sheet.png', 193, 71);
+		game.load.spritesheet('startButton', 'assets/button_sprite_sheet.png', 193, 71);
 		game.load.audio('intro', 'assets/music/long_away_home.wav');
 		game.load.audio('start', 'assets/sounds/go.ogg');
 	},
