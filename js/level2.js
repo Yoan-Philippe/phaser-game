@@ -69,17 +69,17 @@ var level2State = {
 
         players.add(player);
 
-        sarah = game.add.sprite(100, game.world.height - 150, 'dude');
-        game.physics.arcade.enable(sarah);
-        sarah.body.collideWorldBounds = true;
-        sarah.animations.add('left', [0, 1, 2, 3], 10, true);
-        sarah.animations.add('right', [5, 6, 7, 8], 10, true);
+        player2 = game.add.sprite(100, game.world.height - 150, 'dude');
+        game.physics.arcade.enable(player2);
+        player2.body.collideWorldBounds = true;
+        player2.animations.add('left', [0, 1, 2, 3], 10, true);
+        player2.animations.add('right', [5, 6, 7, 8], 10, true);
 
-        players.add(sarah);
+        players.add(player2);
         players.setAll('body.gravity.y', 600);
         players.setAll('body.bounce.y', 0.2);
 
-        sarah.scale.setTo(1.5, 1.5);
+        player2.scale.setTo(1.5, 1.5);
 
         zombiePositions = [[400,40], [600,game.world.height - 300], [150,180], [700,460], [700,420]];
         for (var i = 0; i < 5; i++)
@@ -96,6 +96,11 @@ var level2State = {
         ennemies.setAll('body.gravity.y', 300);
         ennemies.setAll('body.bounce.y', 0.2);
         ennemies.setAll('body.collideWorldBounds', true);
+
+        player.body.onCollide = new Phaser.Signal();
+        player2.body.onCollide = new Phaser.Signal();
+        player.body.onCollide.add(checkCollide, this);
+        player2.body.onCollide.add(checkCollidePlayer2, this);
         
         //  Creates 1 single bullet, using the 'bullet' graphic
         weapon = game.add.weapon(3, 'bullet');
@@ -166,15 +171,12 @@ var level2State = {
     update: function(){
             var hitPlatformHeal = game.physics.arcade.collide(healers, platforms);
             var hitPlatform = game.physics.arcade.collide(player, platforms);
-            var hitPlatformSarah = game.physics.arcade.collide(sarah, platforms);
+            var hitPlatformPlayer2 = game.physics.arcade.collide(player2, platforms);
 
 
             ennemies.forEach(function(item) {
                 game.physics.arcade.collide(item, platforms);
-                game.physics.arcade.collide(item, player);
-
                 game.physics.arcade.overlap(weapon.bullets, item, hitZombie, null, this);
-                game.physics.arcade.overlap(sarah, item, damagePlayer, null, this);
 
             }, this);
 
@@ -210,17 +212,17 @@ var level2State = {
             }
 
 
-            sarah.body.velocity.x = 0;
+            player2.body.velocity.x = 0;
             if (left.isDown) {
-                sarah.body.velocity.x = -150;
-                sarah.animations.play('left');
+                player2.body.velocity.x = -150;
+                player2.animations.play('left');
             } else if (right.isDown)
             {
-                sarah.body.velocity.x = 150;
-                sarah.animations.play('right');
+                player2.body.velocity.x = 150;
+                player2.animations.play('right');
             } else {
-                sarah.animations.stop();
-                sarah.frame = 4;
+                player2.animations.stop();
+                player2.frame = 4;
             }
 
             if(player.body.touching.down && hitPlatform){
@@ -236,7 +238,7 @@ var level2State = {
 
             if (up.isDown)
             {
-                sarah.body.velocity.y = -200;
+                player2.body.velocity.y = -200;
             }
 
             if (cursors.up.isDown && playerOnWall)
@@ -247,7 +249,7 @@ var level2State = {
 
             //Star
             game.physics.arcade.collide(stars, platforms);
-            game.physics.arcade.overlap(sarah, stars, collectStar, null, this);
+            game.physics.arcade.overlap(player2, stars, collectStar, null, this);
 
             game.physics.arcade.overlap(weapon.bullets, platforms, killBullet, null, this);
 
