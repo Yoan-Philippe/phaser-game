@@ -16,6 +16,7 @@ var loadState = {
         game.load.spritesheet('tree2', 'assets/foliagePack_default.png', 172, 193, 150,-20);
         game.load.image('bullet', 'assets/weapon/ammo_machinegun.png');
         game.load.spritesheet('restartButton', 'assets/button_sprite_sheet.png', 193, 71);
+        game.load.spritesheet('bats', 'assets/bat-sprite.png', 32, 30);
 
         game.load.audio('win', 'assets/sounds/you_win.ogg');
         game.load.audio('lose', 'assets/sounds/time_over.ogg');
@@ -70,17 +71,17 @@ var loadState = {
 
         players.add(player);
 
-        sarah = game.add.sprite(100, game.world.height - 150, 'dude');
-        game.physics.arcade.enable(sarah);
-        sarah.body.collideWorldBounds = true;
-        sarah.animations.add('left', [0, 1, 2, 3], 10, true);
-        sarah.animations.add('right', [5, 6, 7, 8], 10, true);
+        player2 = game.add.sprite(100, game.world.height - 150, 'dude');
+        game.physics.arcade.enable(player2);
+        player2.body.collideWorldBounds = true;
+        player2.animations.add('left', [0, 1, 2, 3], 10, true);
+        player2.animations.add('right', [5, 6, 7, 8], 10, true);
 
-        players.add(sarah);
+        players.add(player2);
         players.setAll('body.gravity.y', 600);
         players.setAll('body.bounce.y', 0.2);
 
-        sarah.scale.setTo(1.5, 1.5);
+        player2.scale.setTo(1.5, 1.5);
 
         zombie = game.add.sprite(400, 40, 'zombie');
         game.physics.arcade.enable(zombie);
@@ -110,10 +111,16 @@ var loadState = {
 
         ennemies.add(zombie2);
 
+        bat = game.add.sprite(350, 250, 'bats');
+        game.physics.arcade.enable(bat);
+        bat.body.collideWorldBounds = true;
+        bat.scale.setTo(1.5, 1.5);
+        bat.animations.add('up', [01, 02], 4, true);
+
         player.body.onCollide = new Phaser.Signal();
-        sarah.body.onCollide = new Phaser.Signal();
+        player2.body.onCollide = new Phaser.Signal();
         player.body.onCollide.add(checkCollide, this);
-        sarah.body.onCollide.add(checkCollidePlayer2, this);
+        player2.body.onCollide.add(checkCollidePlayer2, this);
 
         zombie.anchor.setTo(.5,.5);
         zombie2.anchor.setTo(.5,.5);
@@ -187,34 +194,39 @@ var loadState = {
     update: function(){
             var hitPlatformHeal = game.physics.arcade.collide(healers, platforms);
             var hitPlatform = game.physics.arcade.collide(player, platforms);
-            var hitPlatformSarah = game.physics.arcade.collide(sarah, platforms);
+            var hitPlatformPlayer2 = game.physics.arcade.collide(player2, platforms);
             var hitPlatformZombie = game.physics.arcade.collide(zombie, platforms);
             var hitPlatformZombie2 = game.physics.arcade.collide(zombie2, platforms);
+            var hitPlatformBat = game.physics.arcade.collide(bat, platforms);
 
             playerHitByZombie = game.physics.arcade.collide(player, zombie); 
             playerHitByZombie2 = game.physics.arcade.collide(player, zombie2); 
-            player2HitByZombie = game.physics.arcade.collide(sarah, zombie); 
-            player2HitByZombie2 = game.physics.arcade.collide(sarah, zombie2); 
+            player2HitByZombie = game.physics.arcade.collide(player2, zombie); 
+            player2HitByZombie2 = game.physics.arcade.collide(player2, zombie2); 
+            playerHitByBat = game.physics.arcade.collide(player, bat); 
+            player2HitByBat = game.physics.arcade.collide(player2, bat); 
 
             var playerOnWall = player.body.onWall();
 
             //Zombie
-            /*game.physics.arcade.overlap(sarah, zombie, damagePlayer, null, this);
+            /*game.physics.arcade.overlap(player2, zombie, damagePlayer, null, this);
             game.physics.arcade.overlap(player, zombie, damagePlayer, null, this);
-            game.physics.arcade.overlap(sarah, zombie2, damagePlayer, null, this);
+            game.physics.arcade.overlap(player2, zombie2, damagePlayer, null, this);
             game.physics.arcade.overlap(player, zombie2, damagePlayer, null, this);*/
 
             //Star
             game.physics.arcade.collide(stars, platforms);
-            game.physics.arcade.overlap(sarah, stars, collectStar, null, this);
+            game.physics.arcade.overlap(player2, stars, collectStar, null, this);
 
             game.physics.arcade.overlap(weapon.bullets, zombie, hitZombie, null, this);
             game.physics.arcade.overlap(weapon.bullets, zombie2, hitZombie2, null, this);
+            game.physics.arcade.overlap(weapon.bullets, bat, hitBat, null, this);
             game.physics.arcade.overlap(weapon.bullets, platforms, killBullet, null, this);
 
 
              //Medic
             game.physics.arcade.overlap(player, firstaid, healPlayer, null, this);
+            game.physics.arcade.overlap(player2, firstaid, healPlayer, null, this);
 
             //Diamond
             game.physics.arcade.collide(diamonds, platforms);
@@ -251,17 +263,17 @@ var loadState = {
             }
 
 
-            sarah.body.velocity.x = 0;
+            player2.body.velocity.x = 0;
             if (left.isDown) {
-                sarah.body.velocity.x = -150;
-                sarah.animations.play('left');
+                player2.body.velocity.x = -150;
+                player2.animations.play('left');
             } else if (right.isDown)
             {
-                sarah.body.velocity.x = 150;
-                sarah.animations.play('right');
+                player2.body.velocity.x = 150;
+                player2.animations.play('right');
             } else {
-                sarah.animations.stop();
-                sarah.frame = 4;
+                player2.animations.stop();
+                player2.frame = 4;
             }
 
             if(player.body.touching.down && hitPlatform){
@@ -277,7 +289,7 @@ var loadState = {
 
             if (up.isDown)
             {
-                sarah.body.velocity.y = -200;
+                player2.body.velocity.y = -200;
             }
 
             if (cursors.up.isDown && playerOnWall)
@@ -302,6 +314,13 @@ var loadState = {
                     zombieCanMove = false;
                     zombie.animations.play('zombiewin');
                     zombie2.animations.play('zombiewin');
+                    // Save score
+                    if(localStorage.getItem('highScore') === null){
+                        localStorage.setItem('highScore',score);
+                    }
+                    else if(score > localStorage.getItem('highScore')){
+                        localStorage.setItem('highScore',score);
+                    }
                     button = game.add.button(game.world.centerX - 95, 400, 'restartButton', restartGame, this, 2, 1, 0);
                 }
             }
@@ -373,5 +392,29 @@ var loadState = {
                     zombie2.animations.play('fight');
                 }
             }
+
+            bat.body.position.x = 350;
+            //if(batCanMove){
+                //if(playerHitByZombie == false && player2HitByZombie == false){
+                    if(bat.body.position.y > 150  && directionBat == 'top'){
+                        bat.body.position.y = bat.body.position.y - 2;
+                        bat.animations.play('up');
+                         //bat.scale.y = -0.5;
+                    }
+                    else{
+                        directionBat = 'bottom';
+                        if(bat.body.position.y < 300){
+                           bat.body.position.y = bat.body.position.y + 2;
+                           //bat.scale.y = 0.5;
+                        }
+                        else{
+                            directionBat = 'top';
+                        }
+                    }
+                /*}
+                else{
+                    bat.animations.play('fight');
+                }*/
+            //}
     }
 };

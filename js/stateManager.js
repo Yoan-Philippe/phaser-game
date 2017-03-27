@@ -5,6 +5,7 @@ var score = 0;
 var health = 100;
 var zombieHealth = 100;
 var zombie2Health = 100;
+var batHealth = 50;
 var time = 1300;
 var starPoint = 10;
 var diamondPoint = 50;
@@ -14,6 +15,7 @@ var nbrJump = 2;
 var direction = 'left';
 var directionZombie = 'left';
 var directionZombie2 = 'left';
+var directionBat = 'top';
 var fuelBar;
 var zombieCanMove = true;
 var playerHit = false;
@@ -28,7 +30,7 @@ game.state.add('boot', bootState);
 game.state.add('intro', introState);
 game.state.add('level1', loadState);
 game.state.add('finish', finishState);
-//game.state.add('level2', level2State);
+game.state.add('level2', level2State);
 
 game.state.start('boot');
 
@@ -39,7 +41,7 @@ function nextLevel () {
     zombieHealth = 100;
     zombie2Health = 100;
     time = 1500;
-    game.state.start('level1');
+    game.state.start('level2');
 }
 
 function startGame () {
@@ -88,7 +90,7 @@ function healPlayer (player, medic) {
     medic.kill();
     health += 50;
 
-    healthText.text = 'Health: ' + health;
+    healthText.text = 'Health: ' + Math.round(health);
 }
 
 
@@ -120,31 +122,45 @@ function hitZombie2 (zombie2, bullet) {
     }
 }
 
+function hitBat (zombie2, bullet) {
+    hit = game.add.audio('hit');
+    hit.play();
+    bullet.kill();
+    if(batHealth > 0){
+        batHealth -= 25;
+    }
+    else{
+        bat.kill();
+        score += 20;
+        scoreText.text = 'Score: ' + score;
+    }
+}
+
 function killBullet (bullet, platform) {
     bullet.kill();
 }
 
 
 function checkCollide (sprite1, sprite2){
-    if(sprite2.key == 'zombie'){
+    if(sprite2.key == 'zombie' || sprite2.key == 'bats' ){
         if(health>0){
-            health -= 1;
+            health -= 0.2;
         }
         else{
             player.kill();
         }
-        healthText.text = 'Health: ' + health;
+        healthText.text = 'Health: ' + Math.round(health);
     }
 }
 
 function checkCollidePlayer2 (sprite1, sprite2){
-    if(sprite2.key == 'zombie'){
+    if(sprite2.key == 'zombie' || sprite2.key == 'bats' ){
         if(health>0){
-            health -= 1;
+            health -= 0.2;
         }
         else{
-            sarah.kill();
+            player2.kill();
         }
-        healthText.text = 'Health: ' + health;
+        healthText.text = 'Health: ' + Math.round(health);
     }
 }
